@@ -27,6 +27,11 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer conn.Close()
 
+	go handleConnection(conn)
+
+}
+
+func handleConnection(conn *websocket.Conn) {
 	for {
 		_, msg, err := conn.ReadMessage()
 
@@ -42,7 +47,6 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
-
 func main() {
 	http.HandleFunc("/ws", wsHandler)
 	fmt.Println("Websocket server started on server 8080")

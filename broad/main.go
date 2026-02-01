@@ -18,16 +18,19 @@ var clients = make(map[*websocket.Conn]bool)
 var broadcast = make(chan []byte)
 var mutex = &sync.Mutex{}
 
-func wsHandler(w http.ResponseWriter, r *http.Request) {
+func wshandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
+
 	if err != nil {
-		fmt.Println("Error upgrading:", err)
-		return
+		fmt.Println("Upgrading error", err)
 	}
+
 	defer conn.Close()
 
 	mutex.Lock()
+
 	clients[conn] = true
+
 	mutex.Unlock()
 
 	for {
@@ -40,26 +43,26 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		broadcast <- message
 	}
+
 }
 
 func handleMessages() {
-	for {
-		message := <-broadcast
+	message := <-broadcast
 
-		mutex.Lock()
-		for client := range clients {
-			err := client.WriteMessage(websocket.TextMessage, message)
-			if err != nil {
-				client.Close()
-				delete(clients, client)
-			}
+	mutex.Lock()
+	for client := range clients {
+		err := client.WriteMessage(websocket.TextMessage, message)
+		if err != nil {
+			client.Close()
+			delete(clients, client)
 		}
-		mutex.Unlock()
 	}
+
+	mutex.Unlock()
 }
 
 func main() {
-	http.HandleFunc("/ws", wsHandler)
+	http.HandleFunc("/ws", wshandler)
 	go handleMessages()
 	fmt.Println("WebSocket server started on :8080")
 	err := http.ListenAndServe(":8080", nil)

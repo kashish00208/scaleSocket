@@ -9,10 +9,6 @@ import (
 	"syscall"
 )
 
-func NewChatServer() {
-	//will write the logic here
-}
-
 func main() {
 	server := NewChatServer()
 

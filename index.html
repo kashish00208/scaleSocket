@@ -30,7 +30,7 @@
 
         ws.onclose = function() {
             console.log("WebSocket connection closed, retrying...");
-            setTimeout(connect, 1000); // Reconnect after 1 second
+            setTimeout(connect, 1000); 
         };
 
         ws.onerror = function(error) {

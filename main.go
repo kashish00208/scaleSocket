@@ -20,16 +20,11 @@ func main() {
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-type", "application/json")
-		fmt.Fprintf(w, `{"Status":"Healthy","connections":%d,"rooms":%d}`,
-			server.ConnectionsCount(),
-			server.RoomCount(),
-		)
+		fmt.Fprintf(w, `{"Status":"Healthy","connections":%d,"rooms":%d}`)
 	})
 
 	http.HandleFunc("status", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-type", "application/json")
-		status := server.getStats()
-		fmt.Print(w, status)
 	})
 
 	port := ":8080"

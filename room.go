@@ -53,7 +53,7 @@ func (r *Room) handleJoin(client *Client) {
 	r.mu.Unlock()
 
 	// Notify others that user joined
-	joinMsg := NewMessage(MsgTypeJoin, r.name, client.GetID(), client.GetUsername(), "joined the room")
+	joinMsg := NewMessage(msgJoin, r.name, client.GetID(), client.GetUsername(), "joined the room")
 	r.broadcast <- joinMsg
 
 	// Send user list to all clients
@@ -71,7 +71,7 @@ func (r *Room) handleLeave(client *Client) {
 	r.mu.Unlock()
 
 	// Notify others that user left
-	leaveMsg := NewMessage(MsgTypeLeave, r.name, client.GetID(), client.GetUsername(), "left the room")
+	leaveMsg := NewMessage(msgLeave, r.name, client.GetID(), client.GetUsername(), "left the room")
 	r.broadcast <- leaveMsg
 
 	// Send updated user list
@@ -94,16 +94,16 @@ func (r *Room) sendUserList() {
 	users := make([]UserInfo, 0, len(r.clients))
 	for _, client := range r.clients {
 		users = append(users, UserInfo{
-			UserID:   client.GetID(),
-			Username: client.GetUsername(),
-			JoinedAt: time.Now().UTC(),
+			UserId:   client.GetID(),
+			UserName: client.GetUsername(),
+			JoinedAT: time.Now().UTC(),
 		})
 	}
 	r.mu.RUnlock()
 
 	// Create user list message
-	userListMsg := NewMessage(MsgTypeUserList, r.name, "", "", "")
-	userListMsg.Metadata = map[string]interface{}{
+	userListMsg := NewMessage(msgUserList, r.name, "", "", "")
+	userListMsg.MetaData = map[string]interface{}{
 		"users": users,
 	}
 
@@ -119,7 +119,7 @@ func (r *Room) Broadcast(msg *Message) {
 	select {
 	case r.broadcast <- msg:
 	default:
-		// Channel full, drop message to prevent blocking
+		// Channel full here
 	}
 }
 
@@ -156,9 +156,9 @@ func (r *Room) GetUsers() []UserInfo {
 	users := make([]UserInfo, 0, len(r.clients))
 	for _, client := range r.clients {
 		users = append(users, UserInfo{
-			UserID:   client.GetID(),
-			Username: client.GetUsername(),
-			JoinedAt: time.Now().UTC(),
+			UserId:   client.GetID(),
+			UserName: client.GetUsername(),
+			JoinedAT: time.Now().UTC(),
 		})
 	}
 	return users

@@ -54,11 +54,11 @@ func (c *Client) ReadPump() {
 		c.conn.SetReadDeadline(time.Now().Add(60 * time.Second))
 
 		switch msg.Type {
-		case MsgTypeJoin:
+		case msgJoin:
 			c.handleJoin(&msg)
-		case MsgTypeLeave:
+		case msgLeave:
 			c.handleLeave(&msg)
-		case MsgTypeChat:
+		case msgChat:
 			c.handleChat(&msg)
 		default:
 			log.Printf("Unknown message type: %s", msg.Type)
@@ -100,8 +100,8 @@ func (c *Client) WritePump() {
 func (c *Client) handleJoin(msg *Message) {
 	c.mu.Lock()
 	c.room = msg.Room
-	c.username = msg.Username
-	c.id = msg.UserID
+	c.username = msg.UserName
+	c.id = msg.UserId
 	c.mu.Unlock()
 
 	c.server.JoinRoom(c)
@@ -125,8 +125,8 @@ func (c *Client) handleChat(msg *Message) {
 		return
 	}
 
-	chatMsg := NewMessage(MsgTypeBroadcast, room, userID, username, msg.Content)
-	chatMsg.Metadata = msg.Metadata
+	chatMsg := NewMessage(msgChat, room, userID, username, msg.Content)
+	chatMsg.MetaData = msg.MetaData
 
 	c.server.BroadcastToRoom(room, chatMsg)
 }
@@ -152,7 +152,7 @@ func (c *Client) SendMessage(msg *Message) {
 
 // sendError sends an error message to the client
 func (c *Client) sendError(errMsg string) {
-	msg := NewMessage(MsgTypeError, "", c.id, "", errMsg)
+	msg := NewMessage(msgError, "", c.id, "", errMsg)
 	c.SendMessage(msg)
 }
 
